@@ -1,54 +1,40 @@
-import dotenv
-import logging
+import pandas as pd
+from bs4 import BeautifulSoup as bs
 
-from datetime import datetime
+import requests as r
 
-# Importing scraping and data processing modules
-# from dependencies.scraping.<file_name> import <class_name>
-# from dependencies.scraping.<file_name> import <class_name>
-# from dependencies.cleaning.<file_name> import <class_name>
-# from dependencies.geocoding.<file_name> import <class_name>
-# from dependencies.standardization.<file_name> import <class_name>
+data = r.get("https://www.bls.gov/")
+# url of data
+print(data.url)
+a = data.content
 
-dotenv.load_dotenv(".env")
-logging.basicConfig(level=logging.INFO)
+# parsing html
+par = bs(a, "html.parser")
+print(par.prettify())
 
+s = par.find('body')
+# printing all anchor tags
+for i in s.find_all('a'):
+    print(i.get('href'))
 
-# In each step create an object of the class, initialize the class with 
-# required configuration and call the run method 
-def step_1():
-    logging.info("Scraped Metadata")
+# scrapping history page
+par1 = r.get('https://www.bls.gov/bls/history/home.htm')
+print(par1.url)
+s = bs(par1.content, 'html.parser')
+his = s.find('div', class_='bls--history')
+p = his.find_all('p')
+# history of the US labor statistics website
+print("History")
+for i in p:
+    print(i.text)
 
+# scraping leadership page
 
-def step_2():
-    logging.info("Scraped Main Data")
+leader = r.get('https://www.bls.gov/bls/senior_staff/home.htm')
+print("The URL of Leadership Website Is : ", leader.url)
 
-
-def step_3():
-    logging.info("Cleaned Main Data")
-
-
-def step_4():
-    logging.info("Geocoded Cleaned Data")
-
-
-def step_5():
-    logging.info("Standardized Geocoded Data")
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--step", help="step to be choosen for execution")
-
-    args = parser.parse_args()
-
-    eval(f"step_{args.step}()")
-
-    logging.info(
-        {
-            "last_executed": str(datetime.now()),
-            "status": "Pipeline executed successfully",
-        }
-    )
+n = bs(leader.content, 'html.parser')
+de = n.find('div', class_='bls--senior-staff')
+print("Names of leaders")
+for i in de.find_all('span', class_='orgname'):
+    print(i.text)
